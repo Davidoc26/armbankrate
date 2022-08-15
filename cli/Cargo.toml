@@ -1,0 +1,18 @@
+[package]
+name = "armbankrate-cli"
+version = "0.1.0"
+authors = ["David Eritsyan <dav.eritsyan@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+armbankrate-parser = { path = "../parser" }
+clap = { version = "3.2.16", features = ["derive"] }
+tokio = { version = "1.20.1", features = ["full"] }
+enum-display-derive = "0.1.1"
+anyhow = "1.0.60"
+tabled = { version = "0.8.0", features = ["color"] }
+colored = "2.0.0"
+
+[[bin]]
+name = "armbankrate"
+path = "src/main.rs"
