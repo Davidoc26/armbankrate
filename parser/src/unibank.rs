@@ -9,6 +9,10 @@ pub struct Unibank {
     body: BankBody,
     cash_currencies: CurrencyBody,
     cashless_currencies: CurrencyBody,
+    #[serde(skip_serializing)]
+    cash_selector: Selector,
+    #[serde(skip_serializing)]
+    no_cash_selector: Selector,
 }
 
 impl Default for Unibank {
@@ -20,17 +24,15 @@ impl Default for Unibank {
             },
             cash_currencies: Default::default(),
             cashless_currencies: Default::default(),
+            cash_selector: Selector::parse("#Cash > div.pane__body > ul:nth-child(2) > li:nth-child(3n+1)").unwrap(),
+            no_cash_selector: Selector::parse("#Noncash > div.pane__body > ul > li:nth-child(3n+1)").unwrap(),
         }
     }
 }
 
 impl BankImpl for Unibank {
     fn parse_cash(&mut self, document: &Html) -> Result<(), Error> {
-        let selector =
-            Selector::parse("#Cash > div.pane__body > ul:nth-child(2) > li:nth-child(3n+1)")
-                .unwrap();
-
-        for element in document.select(&selector).take(4) {
+        for element in document.select(&self.cash_selector).take(4) {
             let currency_name = {
                 let value = ElementRef::wrap(element.children().next().ok_or(BankParseFail)?)
                     .ok_or(BankParseFail)?
@@ -77,10 +79,7 @@ impl BankImpl for Unibank {
     }
 
     fn parse_no_cash(&mut self, document: &Html) -> Result<(), Error> {
-        let selector =
-            Selector::parse("#Noncash > div.pane__body > ul > li:nth-child(3n+1)").unwrap();
-
-        for element in document.select(&selector) {
+        for element in document.select(&self.no_cash_selector) {
             let currency_name = {
                 let value = ElementRef::wrap(element.children().next().ok_or(BankParseFail)?)
                     .ok_or(BankParseFail)?

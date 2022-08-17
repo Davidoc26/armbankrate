@@ -12,6 +12,12 @@ pub struct Idbank {
     body: BankBody,
     cash_currencies: CurrencyBody,
     cashless_currencies: CurrencyBody,
+    #[serde(skip_serializing)]
+    main_selector: Selector,
+    #[serde(skip_serializing)]
+    currency_name_regex: Regex,
+    #[serde(skip_serializing)]
+    currency_value_regex: Regex,
 }
 
 impl Default for Idbank {
@@ -23,6 +29,9 @@ impl Default for Idbank {
             },
             cash_currencies: Default::default(),
             cashless_currencies: Default::default(),
+            main_selector: Selector::parse("#\\.default > div.m-exchange > div.m-exchange__table > div > .m-exchange__table-cell:nth-child(1)").unwrap(),
+            currency_name_regex: Regex::new(r"\d \w{3}").unwrap(),
+            currency_value_regex: Regex::new(r"\d{1,3}").unwrap(),
         }
     }
 }
@@ -53,12 +62,8 @@ impl BankImpl for Idbank {
     }
 
     fn parse_cash(&mut self, document: &Html) -> Result<(), Error> {
-        let selector = Selector::parse("#\\.default > div.m-exchange > div.m-exchange__table > div > .m-exchange__table-cell:nth-child(1)").unwrap();
-        let currency_name_regex = Regex::new(r"\d \w{3}").unwrap();
-        let currency_value_regex = Regex::new(r"\d{1,3}").unwrap();
-
-        for element in document.select(&selector).skip(1).take(5) {
-            let currency_name = match currency_name_regex.find(&element.inner_html()) {
+        for element in document.select(&self.main_selector).skip(1).take(5) {
+            let currency_name = match self.currency_name_regex.find(&element.inner_html()) {
                 Some(matched) => {
                     match CurrencyName::from_str(matched.as_str().trim_start_matches("1 ")) {
                         Ok(name) => name,
@@ -72,7 +77,7 @@ impl BankImpl for Idbank {
                 let inner_html = ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
                     .ok_or(BankParseFail)?
                     .inner_html();
-                match { currency_value_regex.find(&inner_html) } {
+                match { self.currency_value_regex.find(&inner_html) } {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),
                 }
@@ -82,7 +87,7 @@ impl BankImpl for Idbank {
                 let inner_html = ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
                     .ok_or(BankParseFail)?
                     .inner_html();
-                match { currency_value_regex.find(&inner_html) } {
+                match { self.currency_value_regex.find(&inner_html) } {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),
                 }
@@ -95,12 +100,8 @@ impl BankImpl for Idbank {
     }
 
     fn parse_no_cash(&mut self, document: &Html) -> Result<(), Error> {
-        let selector = Selector::parse("#\\.default > div.m-exchange > div.m-exchange__table > div > .m-exchange__table-cell:nth-child(1)").unwrap();
-        let currency_name_regex = Regex::new(r"\d \w{3}").unwrap();
-        let currency_value_regex = Regex::new(r"\d{1,3}").unwrap();
-
-        for element in document.select(&selector).skip(1) {
-            let currency_name = match currency_name_regex.find(&element.inner_html()) {
+        for element in document.select(&self.main_selector).skip(1) {
+            let currency_name = match self.currency_name_regex.find(&element.inner_html()) {
                 Some(matched) => {
                     match CurrencyName::from_str(matched.as_str().trim_start_matches("1 ")) {
                         Ok(name) => name,
@@ -114,7 +115,7 @@ impl BankImpl for Idbank {
                 let inner_html = ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
                     .ok_or(BankParseFail)?
                     .inner_html();
-                match { currency_value_regex.find(&inner_html) } {
+                match { self.currency_value_regex.find(&inner_html) } {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),
                 }
@@ -124,7 +125,7 @@ impl BankImpl for Idbank {
                 let inner_html = ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
                     .ok_or(BankParseFail)?
                     .inner_html();
-                match { currency_value_regex.find(&inner_html) } {
+                match { self.currency_value_regex.find(&inner_html) } {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),
                 }

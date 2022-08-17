@@ -10,6 +10,12 @@ pub struct Ardshinbank {
     body: BankBody,
     cash_currencies: CurrencyBody,
     no_cash_currencies: CurrencyBody,
+    #[serde(skip_serializing)]
+    cash_selector: Selector,
+    #[serde(skip_serializing)]
+    no_cash_selector: Selector,
+    #[serde(skip_serializing)]
+    span_selector: Selector,
 }
 
 impl Default for Ardshinbank {
@@ -21,6 +27,9 @@ impl Default for Ardshinbank {
             },
             cash_currencies: Default::default(),
             no_cash_currencies: Default::default(),
+            cash_selector: Selector::parse(r#"#cash > table > tbody > tr > td.tg-cod"#).unwrap(),
+            no_cash_selector: Selector::parse(r#"#no-cash > table > tbody > tr > td.tg-cod"#).unwrap(),
+            span_selector: Selector::parse("span").unwrap(),
         }
     }
 }
@@ -28,13 +37,10 @@ impl Default for Ardshinbank {
 #[async_trait]
 impl BankImpl for Ardshinbank {
     fn parse_cash(&mut self, document: &Html) -> Result<(), Error> {
-        let selector = Selector::parse(r#"#cash > table > tbody > tr > td.tg-cod"#).unwrap();
-        let span_selector = Selector::parse("span").unwrap();
-
-        for element in document.select(&selector).take(4) {
+        for element in document.select(&self.cash_selector).take(4) {
             let currency_name = {
                 element
-                    .select(&span_selector)
+                    .select(&self.span_selector)
                     .next()
                     .ok_or(BankParseFail)?
                     .inner_html()
@@ -45,7 +51,7 @@ impl BankImpl for Ardshinbank {
             let currency_buy = {
                 ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
                     .ok_or(BankParseFail)?
-                    .select(&span_selector)
+                    .select(&self.span_selector)
                     .next()
                     .ok_or(BankParseFail)?
                     .inner_html()
@@ -55,7 +61,7 @@ impl BankImpl for Ardshinbank {
             let currency_sell = {
                 ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
                     .ok_or(BankParseFail)?
-                    .select(&span_selector)
+                    .select(&self.span_selector)
                     .next()
                     .ok_or(BankParseFail)?
                     .inner_html()
@@ -74,13 +80,10 @@ impl BankImpl for Ardshinbank {
     }
 
     fn parse_no_cash(&mut self, document: &Html) -> Result<(), Error> {
-        let selector = Selector::parse(r#"#no-cash > table > tbody > tr > td.tg-cod"#).unwrap();
-        let span_selector = Selector::parse("span").unwrap();
-
-        for element in document.select(&selector).take(4) {
+        for element in document.select(&self.no_cash_selector).take(4) {
             let currency_name = {
                 element
-                    .select(&span_selector)
+                    .select(&self.span_selector)
                     .next()
                     .ok_or(BankParseFail)?
                     .inner_html()
@@ -96,7 +99,7 @@ impl BankImpl for Ardshinbank {
             let currency_buy = {
                 ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
                     .ok_or(BankParseFail)?
-                    .select(&span_selector)
+                    .select(&self.span_selector)
                     .next()
                     .ok_or(BankParseFail)?
                     .inner_html()
@@ -106,7 +109,7 @@ impl BankImpl for Ardshinbank {
             let currency_sell = {
                 ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
                     .ok_or(BankParseFail)?
-                    .select(&span_selector)
+                    .select(&self.span_selector)
                     .next()
                     .ok_or(BankParseFail)?
                     .inner_html()

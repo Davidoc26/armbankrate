@@ -10,6 +10,8 @@ pub struct Conversebank {
     body: BankBody,
     cash_currencies: CurrencyBody,
     cashless_currencies: CurrencyBody,
+    #[serde(skip_serializing)]
+    main_selector: Selector,
 }
 
 impl Conversebank {
@@ -39,6 +41,7 @@ impl Default for Conversebank {
             },
             cash_currencies: Default::default(),
             cashless_currencies: Default::default(),
+            main_selector: Selector::parse("#main_static_content > table:nth-child(5) > tbody > tr").unwrap(),
         }
     }
 }
@@ -46,10 +49,7 @@ impl Default for Conversebank {
 #[async_trait]
 impl BankImpl for Conversebank {
     fn parse_cash(&mut self, document: &Html) -> Result<(), Error> {
-        let selector =
-            Selector::parse("#main_static_content > table:nth-child(5) > tbody > tr").unwrap();
-
-        for element in document.select(&selector).skip(2).take(4) {
+        for element in document.select(&self.main_selector).skip(2).take(4) {
             let currency_name = match self.parse_currency_name_from_element(&element) {
                 Ok(currency_name) => currency_name,
                 Err(_) => continue,
@@ -66,10 +66,7 @@ impl BankImpl for Conversebank {
     }
 
     fn parse_no_cash(&mut self, document: &Html) -> Result<(), Error> {
-        let selector =
-            Selector::parse("#main_static_content > table:nth-child(5) > tbody > tr").unwrap();
-
-        for element in document.select(&selector).skip(2).take(4) {
+        for element in document.select(&self.main_selector).skip(2).take(4) {
             let currency_name = match self.parse_currency_name_from_element(&element) {
                 Ok(currency_name) => currency_name,
                 Err(_) => continue,

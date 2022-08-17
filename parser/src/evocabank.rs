@@ -9,6 +9,12 @@ pub struct Evocabank {
     body: BankBody,
     cash_currencies: CurrencyBody,
     cashless_currencies: CurrencyBody,
+    #[serde(skip_serializing)]
+    cash_selector: Selector,
+    #[serde(skip_serializing)]
+    no_cash_selector: Selector,
+    #[serde(skip_serializing)]
+    span_selector: Selector,
 }
 
 impl Default for Evocabank {
@@ -20,17 +26,17 @@ impl Default for Evocabank {
             },
             cash_currencies: Default::default(),
             cashless_currencies: Default::default(),
+            cash_selector: Selector::parse("#tab-1 > div > div.exchange > div > div.exchange__box > div > div > table > tbody > tr").unwrap(),
+            no_cash_selector: Selector::parse("#tab-2 > div > div.exchange > div > div.exchange__box > div > div > table > tbody > tr").unwrap(),
+            span_selector: Selector::parse("span").unwrap(),
         }
     }
 }
 
 impl BankImpl for Evocabank {
     fn parse_cash(&mut self, document: &Html) -> Result<(), Error> {
-        let selector = Selector::parse("#tab-1 > div > div.exchange > div > div.exchange__box > div > div > table > tbody > tr").unwrap();
-        let span_selector = Selector::parse("span").unwrap();
-
-        for element in document.select(&selector).take(4) {
-            let currency_name = element.select(&span_selector).next().ok_or(BankParseFail)?.inner_html();
+        for element in document.select(&self.cash_selector).take(4) {
+            let currency_name = element.select(&self.span_selector).next().ok_or(BankParseFail)?.inner_html();
 
             let currency_name = match CurrencyName::from_str(&currency_name) {
                 Ok(currency_name) => currency_name,
@@ -63,11 +69,8 @@ impl BankImpl for Evocabank {
     }
 
     fn parse_no_cash(&mut self, document: &Html) -> Result<(), Error> {
-        let selector = Selector::parse("#tab-2 > div > div.exchange > div > div.exchange__box > div > div > table > tbody > tr").unwrap();
-        let span_selector = Selector::parse("span").unwrap();
-
-        for element in document.select(&selector).take(4) {
-            let currency_name = element.select(&span_selector).next().ok_or(BankParseFail)?.inner_html();
+        for element in document.select(&self.no_cash_selector).take(4) {
+            let currency_name = element.select(&self.span_selector).next().ok_or(BankParseFail)?.inner_html();
 
             let currency_name = match CurrencyName::from_str(&currency_name) {
                 Ok(currency_name) => currency_name,
