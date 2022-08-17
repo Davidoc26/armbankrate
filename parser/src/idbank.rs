@@ -31,7 +31,7 @@ impl Default for Idbank {
             cashless_currencies: Default::default(),
             main_selector: Selector::parse("#\\.default > div.m-exchange > div.m-exchange__table > div > .m-exchange__table-cell:nth-child(1)").unwrap(),
             currency_name_regex: Regex::new(r"\d \w{3}").unwrap(),
-            currency_value_regex: Regex::new(r"\d{1,3}").unwrap(),
+            currency_value_regex: Regex::new(r"\d+\.?\d+").unwrap(),
         }
     }
 }
