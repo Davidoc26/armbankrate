@@ -3,6 +3,9 @@ name = "armbankrate-cli"
 version = "0.1.0"
 authors = ["David Eritsyan <dav.eritsyan@gmail.com>"]
 edition = "2021"
+license = "MIT"
+description = "Command line application that prints Armenian bank exchange rates"
+keywords = ["cli"]
 
 [dependencies]
 armbankrate-parser = { path = "../parser" }
