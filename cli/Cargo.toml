@@ -6,9 +6,11 @@ edition = "2021"
 license = "MIT"
 description = "Command line application that prints Armenian bank exchange rates"
 keywords = ["cli"]
+homepage = "https://github.com/Davidoc26/armbankrate/tree/main/cli"
+repository = "https://github.com/Davidoc26/armbankrate/tree/main/cli"
 
 [dependencies]
-armbankrate-parser = { path = "../parser" }
+armbankrate-parser = { version = "0.1.0", path = "../parser" }
 clap = { version = "3.2.16", features = ["derive"] }
 tokio = { version = "1.20.1", features = ["full"] }
 enum-display-derive = "0.1.1"
