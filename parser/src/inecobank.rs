@@ -1,4 +1,6 @@
-use crate::{BankBody, BankImpl, BankParseFail, CLIENT, Currency, CurrencyBody, CurrencyName, Error};
+use crate::{
+    BankBody, BankImpl, BankParseFail, Currency, CurrencyBody, CurrencyName, Error, CLIENT,
+};
 use async_trait::async_trait;
 use scraper::Html;
 use serde::Serialize;
@@ -30,12 +32,12 @@ impl Default for Inecobank {
 #[async_trait]
 impl BankImpl for Inecobank {
     async fn parse(&mut self) -> Result<(), Error> {
-        let response =
-            CLIENT.get(self.get_url())
-                .send()
-                .await?
-                .json::<HashMap<String,Value>>()
-                .await?;
+        let response = CLIENT
+            .get(self.get_url())
+            .send()
+            .await?
+            .json::<HashMap<String, Value>>()
+            .await?;
 
         for item in response["items"].as_array().ok_or(BankParseFail)? {
             let code = item["code"].as_str().ok_or(BankParseFail)?;

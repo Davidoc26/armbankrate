@@ -28,7 +28,8 @@ impl Default for Ardshinbank {
             cash_currencies: Default::default(),
             no_cash_currencies: Default::default(),
             cash_selector: Selector::parse(r#"#cash > table > tbody > tr > td.tg-cod"#).unwrap(),
-            no_cash_selector: Selector::parse(r#"#no-cash > table > tbody > tr > td.tg-cod"#).unwrap(),
+            no_cash_selector: Selector::parse(r#"#no-cash > table > tbody > tr > td.tg-cod"#)
+                .unwrap(),
             span_selector: Selector::parse("span").unwrap(),
         }
     }
@@ -116,11 +117,7 @@ impl BankImpl for Ardshinbank {
                     .parse::<f64>()?
             };
 
-            let currency = Currency::new(
-                currency_name,
-                Some(currency_buy),
-                Some(currency_sell),
-            );
+            let currency = Currency::new(currency_name, Some(currency_buy), Some(currency_sell));
 
             self.no_cash_currencies.fill_from_currency(currency);
         }

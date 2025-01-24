@@ -15,7 +15,10 @@ pub struct Conversebank {
 }
 
 impl Conversebank {
-    fn parse_currency_name_from_element(&self, element: &ElementRef) -> Result<CurrencyName, Error> {
+    fn parse_currency_name_from_element(
+        &self,
+        element: &ElementRef,
+    ) -> Result<CurrencyName, Error> {
         let name = ElementRef::wrap(element.children().nth(1).ok_or(BankParseFail)?)
             .ok_or(BankParseFail)?
             .inner_html();
@@ -24,13 +27,14 @@ impl Conversebank {
     }
 
     fn parse_currency_from_element(&self, element: &ElementRef, nth: usize) -> Result<f64, Error> {
-        Ok(ElementRef::wrap(element.children().nth(nth).ok_or(BankParseFail)?)
-            .ok_or(BankParseFail)?
-            .inner_html()
-            .parse::<f64>()?)
+        Ok(
+            ElementRef::wrap(element.children().nth(nth).ok_or(BankParseFail)?)
+                .ok_or(BankParseFail)?
+                .inner_html()
+                .parse::<f64>()?,
+        )
     }
 }
-
 
 impl Default for Conversebank {
     fn default() -> Self {
@@ -41,7 +45,10 @@ impl Default for Conversebank {
             },
             cash_currencies: Default::default(),
             cashless_currencies: Default::default(),
-            main_selector: Selector::parse("#main_static_content > table:nth-child(5) > tbody > tr").unwrap(),
+            main_selector: Selector::parse(
+                "#main_static_content > table:nth-child(5) > tbody > tr",
+            )
+            .unwrap(),
         }
     }
 }

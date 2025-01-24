@@ -6,8 +6,8 @@ mod error;
 mod evocabank;
 mod idbank;
 mod inecobank;
-mod unibank;
 pub mod sort;
+mod unibank;
 
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -17,13 +17,13 @@ use crate::conversebank::Conversebank;
 use crate::evocabank::Evocabank;
 use async_trait::async_trait;
 use enum_dispatch::enum_dispatch;
+use futures::stream::FuturesUnordered;
+use futures::StreamExt;
+use once_cell::sync::Lazy;
+use reqwest::Client;
 use scraper::Html;
 use serde::Serialize;
 use std::str::FromStr;
-use futures::stream::FuturesUnordered;
-use once_cell::sync::Lazy;
-use reqwest::Client;
-use futures::StreamExt;
 
 use crate::error::Error;
 use crate::Error::BankParseFail;
@@ -33,12 +33,7 @@ use crate::inecobank::Inecobank;
 
 use crate::unibank::Unibank;
 
-static CLIENT: Lazy<Client> = Lazy::new(|| {
-    Client::builder()
-        .user_agent("Some")
-        .build()
-        .unwrap()
-});
+static CLIENT: Lazy<Client> = Lazy::new(|| Client::builder().user_agent("Some").build().unwrap());
 
 pub async fn parse<T: ToString>(banks: &[T]) -> Result<Vec<Bank>, Error> {
     let mut banks: Vec<Bank> = banks

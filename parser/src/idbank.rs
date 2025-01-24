@@ -1,6 +1,8 @@
 use async_trait::async_trait;
 
-use crate::{BankBody, BankImpl, BankParseFail, CLIENT, Currency, CurrencyBody, CurrencyName, Error};
+use crate::{
+    BankBody, BankImpl, BankParseFail, Currency, CurrencyBody, CurrencyName, Error, CLIENT,
+};
 use regex::Regex;
 use scraper::{ElementRef, Html, Selector};
 use serde::Serialize;
@@ -74,9 +76,10 @@ impl BankImpl for Idbank {
             };
 
             let currency_buy: f64 = {
-                let inner_html = ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
-                    .ok_or(BankParseFail)?
-                    .inner_html();
+                let inner_html =
+                    ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
+                        .ok_or(BankParseFail)?
+                        .inner_html();
                 match { self.currency_value_regex.find(&inner_html) } {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),
@@ -84,9 +87,10 @@ impl BankImpl for Idbank {
             };
 
             let currency_sell: f64 = {
-                let inner_html = ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
-                    .ok_or(BankParseFail)?
-                    .inner_html();
+                let inner_html =
+                    ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
+                        .ok_or(BankParseFail)?
+                        .inner_html();
                 match { self.currency_value_regex.find(&inner_html) } {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),
@@ -112,9 +116,10 @@ impl BankImpl for Idbank {
             };
 
             let currency_buy: f64 = {
-                let inner_html = ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
-                    .ok_or(BankParseFail)?
-                    .inner_html();
+                let inner_html =
+                    ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
+                        .ok_or(BankParseFail)?
+                        .inner_html();
                 match { self.currency_value_regex.find(&inner_html) } {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),
@@ -122,9 +127,10 @@ impl BankImpl for Idbank {
             };
 
             let currency_sell: f64 = {
-                let inner_html = ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
-                    .ok_or(BankParseFail)?
-                    .inner_html();
+                let inner_html =
+                    ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
+                        .ok_or(BankParseFail)?
+                        .inner_html();
                 match { self.currency_value_regex.find(&inner_html) } {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),

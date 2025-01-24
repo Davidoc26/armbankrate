@@ -1,23 +1,45 @@
-use std::cmp::Ordering;
 use crate::{Bank, BankImpl, Currency, CurrencyBody, CurrencyName, CurrencyType};
+use std::cmp::Ordering;
 
 pub fn sort_banks(banks: &mut [Bank], sort_data: &SortData) {
     banks.sort_by(|a, b| {
-        let (a_currencies, b_currencies): (&CurrencyBody, &CurrencyBody) = currencies_by_type(a, b, &sort_data.currency_type);
+        let (a_currencies, b_currencies): (&CurrencyBody, &CurrencyBody) =
+            currencies_by_type(a, b, &sort_data.currency_type);
 
         match sort_data.currency_name {
-            CurrencyName::USD => compare(a_currencies.get_usd_rate(), b_currencies.get_usd_rate(), &sort_data.order_type),
-            CurrencyName::GBP => compare(a_currencies.get_gbp_rate(), b_currencies.get_gbp_rate(), &sort_data.order_type),
-            CurrencyName::EUR => compare(a_currencies.get_eur_rate(), b_currencies.get_eur_rate(), &sort_data.order_type),
-            CurrencyName::RUB => compare(a_currencies.get_rub_rate(), b_currencies.get_rub_rate(), &sort_data.order_type),
-        }.reverse()
+            CurrencyName::USD => compare(
+                a_currencies.get_usd_rate(),
+                b_currencies.get_usd_rate(),
+                &sort_data.order_type,
+            ),
+            CurrencyName::GBP => compare(
+                a_currencies.get_gbp_rate(),
+                b_currencies.get_gbp_rate(),
+                &sort_data.order_type,
+            ),
+            CurrencyName::EUR => compare(
+                a_currencies.get_eur_rate(),
+                b_currencies.get_eur_rate(),
+                &sort_data.order_type,
+            ),
+            CurrencyName::RUB => compare(
+                a_currencies.get_rub_rate(),
+                b_currencies.get_rub_rate(),
+                &sort_data.order_type,
+            ),
+        }
+        .reverse()
     });
 }
 
-fn currencies_by_type<'a>(a: &'a Bank, b: &'a Bank, currency_type: &CurrencyType) -> (&'a CurrencyBody, &'a CurrencyBody) {
+fn currencies_by_type<'a>(
+    a: &'a Bank,
+    b: &'a Bank,
+    currency_type: &CurrencyType,
+) -> (&'a CurrencyBody, &'a CurrencyBody) {
     match currency_type {
         CurrencyType::Cash => (a.cash_currencies(), b.cash_currencies()),
-        CurrencyType::Noncash => (a.no_cash_currencies(), b.no_cash_currencies())
+        CurrencyType::Noncash => (a.no_cash_currencies(), b.no_cash_currencies()),
     }
 }
 
@@ -37,7 +59,11 @@ pub struct SortData {
 }
 
 impl SortData {
-    pub fn new(currency_type: CurrencyType, currency_name: CurrencyName, order_type: OrderType) -> Self {
+    pub fn new(
+        currency_type: CurrencyType,
+        currency_name: CurrencyName,
+        order_type: OrderType,
+    ) -> Self {
         Self {
             currency_type,
             currency_name,

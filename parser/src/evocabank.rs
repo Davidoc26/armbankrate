@@ -36,7 +36,11 @@ impl Default for Evocabank {
 impl BankImpl for Evocabank {
     fn parse_cash(&mut self, document: &Html) -> Result<(), Error> {
         for element in document.select(&self.cash_selector).take(4) {
-            let currency_name = element.select(&self.span_selector).next().ok_or(BankParseFail)?.inner_html();
+            let currency_name = element
+                .select(&self.span_selector)
+                .next()
+                .ok_or(BankParseFail)?
+                .inner_html();
 
             let currency_name = match CurrencyName::from_str(&currency_name) {
                 Ok(currency_name) => currency_name,
@@ -57,11 +61,7 @@ impl BankImpl for Evocabank {
                 .trim_end()
                 .parse::<f64>()?;
 
-            let currency = Currency::new(
-                currency_name,
-                Some(currency_buy),
-                Some(currency_sell),
-            );
+            let currency = Currency::new(currency_name, Some(currency_buy), Some(currency_sell));
 
             self.cash_currencies.fill_from_currency(currency);
         }
@@ -70,7 +70,11 @@ impl BankImpl for Evocabank {
 
     fn parse_no_cash(&mut self, document: &Html) -> Result<(), Error> {
         for element in document.select(&self.no_cash_selector).take(4) {
-            let currency_name = element.select(&self.span_selector).next().ok_or(BankParseFail)?.inner_html();
+            let currency_name = element
+                .select(&self.span_selector)
+                .next()
+                .ok_or(BankParseFail)?
+                .inner_html();
 
             let currency_name = match CurrencyName::from_str(&currency_name) {
                 Ok(currency_name) => currency_name,
@@ -91,11 +95,7 @@ impl BankImpl for Evocabank {
                 .trim_end()
                 .parse::<f64>()?;
 
-            let currency = Currency::new(
-                currency_name,
-                Some(currency_buy),
-                Some(currency_sell),
-            );
+            let currency = Currency::new(currency_name, Some(currency_buy), Some(currency_sell));
             self.cashless_currencies.fill_from_currency(currency);
         }
         Ok(())

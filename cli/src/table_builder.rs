@@ -15,7 +15,11 @@ pub(crate) struct TableBuilder {
 }
 
 impl TableBuilder {
-    pub(crate) fn new(banks: Vec<Bank>, currency_type: CurrencyType, sort: Option<CurrencyName>) -> Self {
+    pub(crate) fn new(
+        banks: Vec<Bank>,
+        currency_type: CurrencyType,
+        sort: Option<CurrencyName>,
+    ) -> Self {
         Self {
             banks: RefCell::new(banks),
             currency_type,
@@ -108,7 +112,6 @@ impl TableBuilder {
             armbankrate_parser::sort::sort_banks(&mut banks, &sort.to_sort_data(currency_type))
         }
     }
-
 }
 
 enum CurrencyHeader {

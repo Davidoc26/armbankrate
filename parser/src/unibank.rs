@@ -24,8 +24,14 @@ impl Default for Unibank {
             },
             cash_currencies: Default::default(),
             cashless_currencies: Default::default(),
-            cash_selector: Selector::parse("#Cash > div.pane__body > ul:nth-child(2) > li:nth-child(3n+1)").unwrap(),
-            no_cash_selector: Selector::parse("#Noncash > div.pane__body > ul > li:nth-child(3n+1)").unwrap(),
+            cash_selector: Selector::parse(
+                "#Cash > div.pane__body > ul:nth-child(2) > li:nth-child(3n+1)",
+            )
+            .unwrap(),
+            no_cash_selector: Selector::parse(
+                "#Noncash > div.pane__body > ul > li:nth-child(3n+1)",
+            )
+            .unwrap(),
         }
     }
 }
@@ -50,11 +56,11 @@ impl BankImpl for Unibank {
                         .nth(1)
                         .ok_or(BankParseFail)?
                         .first_child()
-                        .ok_or(BankParseFail)?
+                        .ok_or(BankParseFail)?,
                 )
-                    .ok_or(BankParseFail)?
-                    .inner_html()
-                    .parse::<f64>()?
+                .ok_or(BankParseFail)?
+                .inner_html()
+                .parse::<f64>()?
             };
 
             let currency_sell: f64 = {
@@ -64,11 +70,11 @@ impl BankImpl for Unibank {
                         .nth(3)
                         .ok_or(BankParseFail)?
                         .first_child()
-                        .ok_or(BankParseFail)?
+                        .ok_or(BankParseFail)?,
                 )
-                    .ok_or(BankParseFail)?
-                    .inner_html()
-                    .parse::<f64>()?
+                .ok_or(BankParseFail)?
+                .inner_html()
+                .parse::<f64>()?
             };
 
             let currency = Currency::new(currency_name, Some(currency_buy), Some(currency_sell));
@@ -97,11 +103,11 @@ impl BankImpl for Unibank {
                         .nth(1)
                         .ok_or(BankParseFail)?
                         .first_child()
-                        .ok_or(BankParseFail)?
+                        .ok_or(BankParseFail)?,
                 )
-                    .ok_or(BankParseFail)?
-                    .inner_html()
-                    .parse::<f64>()?
+                .ok_or(BankParseFail)?
+                .inner_html()
+                .parse::<f64>()?
             };
 
             let currency_sell: f64 = {
@@ -111,11 +117,11 @@ impl BankImpl for Unibank {
                         .nth(3)
                         .ok_or(BankParseFail)?
                         .first_child()
-                        .ok_or(BankParseFail)?
+                        .ok_or(BankParseFail)?,
                 )
-                    .ok_or(BankParseFail)?
-                    .inner_html()
-                    .parse::<f64>()?
+                .ok_or(BankParseFail)?
+                .inner_html()
+                .parse::<f64>()?
             };
 
             let currency = Currency::new(currency_name, Some(currency_buy), Some(currency_sell));

@@ -5,11 +5,11 @@ extern crate enum_display_derive;
 
 use crate::table_builder::TableBuilder;
 use anyhow::{Context, Result};
+use armbankrate_parser::sort::OrderType;
 use armbankrate_parser::Currency;
 use clap::{ArgEnum, Parser, Subcommand};
 use colored::Colorize;
 use std::fmt::Display;
-use armbankrate_parser::sort::OrderType;
 
 static ERR_MSG: &str = "Something went wrong while receiving bank rates";
 
@@ -72,7 +72,7 @@ async fn main() -> Result<()> {
         Commands::Parse {
             banks,
             currency_type,
-            sort
+            sort,
         } => handle_parse(banks, currency_type, sort).await?,
         Commands::Json { banks } => handle_json(banks).await?,
     };
@@ -103,16 +103,24 @@ impl Colorized for Currency {
     }
 }
 
-async fn handle_parse(banks: Vec<Banks>, currency_type: CurrencyType, sort_by: Option<CurrencyName>) -> Result<()> {
+async fn handle_parse(
+    banks: Vec<Banks>,
+    currency_type: CurrencyType,
+    sort_by: Option<CurrencyName>,
+) -> Result<()> {
     match banks.is_empty() || banks.contains(&Banks::All) {
         true => {
-            let banks = armbankrate_parser::parse_all().await.with_context(|| ERR_MSG)?;
+            let banks = armbankrate_parser::parse_all()
+                .await
+                .with_context(|| ERR_MSG)?;
 
             let table = TableBuilder::new(banks, currency_type, sort_by).build();
             println!("{}", table);
         }
         false => {
-            let banks = armbankrate_parser::parse(&banks).await.with_context(|| ERR_MSG)?;
+            let banks = armbankrate_parser::parse(&banks)
+                .await
+                .with_context(|| ERR_MSG)?;
             let table = TableBuilder::new(banks, currency_type, sort_by).build();
             println!("{}", table);
         }
@@ -140,7 +148,6 @@ async fn handle_json(banks: Vec<Banks>) -> Result<()> {
     Ok(())
 }
 
-
 #[derive(ArgEnum, Display, Debug, Clone)]
 enum CurrencyName {
     UsdBuy,
@@ -154,16 +161,51 @@ enum CurrencyName {
 }
 
 impl CurrencyName {
-    fn to_sort_data(&self, currency_type: armbankrate_parser::CurrencyType) -> armbankrate_parser::sort::SortData {
+    fn to_sort_data(
+        &self,
+        currency_type: armbankrate_parser::CurrencyType,
+    ) -> armbankrate_parser::sort::SortData {
         match self {
-            CurrencyName::UsdBuy => armbankrate_parser::sort::SortData::new(currency_type, armbankrate_parser::CurrencyName::USD, OrderType::Buy),
-            CurrencyName::UsdSell => armbankrate_parser::sort::SortData::new(currency_type, armbankrate_parser::CurrencyName::USD, OrderType::Sell),
-            CurrencyName::GbpBuy => armbankrate_parser::sort::SortData::new(currency_type, armbankrate_parser::CurrencyName::GBP, OrderType::Buy),
-            CurrencyName::GbpSell => armbankrate_parser::sort::SortData::new(currency_type, armbankrate_parser::CurrencyName::GBP, OrderType::Sell),
-            CurrencyName::EurBuy => armbankrate_parser::sort::SortData::new(currency_type, armbankrate_parser::CurrencyName::EUR, OrderType::Buy),
-            CurrencyName::EurSell => armbankrate_parser::sort::SortData::new(currency_type, armbankrate_parser::CurrencyName::EUR, OrderType::Sell),
-            CurrencyName::RubBuy => armbankrate_parser::sort::SortData::new(currency_type, armbankrate_parser::CurrencyName::RUB, OrderType::Buy),
-            CurrencyName::RubSell => armbankrate_parser::sort::SortData::new(currency_type, armbankrate_parser::CurrencyName::RUB, OrderType::Sell),
+            CurrencyName::UsdBuy => armbankrate_parser::sort::SortData::new(
+                currency_type,
+                armbankrate_parser::CurrencyName::USD,
+                OrderType::Buy,
+            ),
+            CurrencyName::UsdSell => armbankrate_parser::sort::SortData::new(
+                currency_type,
+                armbankrate_parser::CurrencyName::USD,
+                OrderType::Sell,
+            ),
+            CurrencyName::GbpBuy => armbankrate_parser::sort::SortData::new(
+                currency_type,
+                armbankrate_parser::CurrencyName::GBP,
+                OrderType::Buy,
+            ),
+            CurrencyName::GbpSell => armbankrate_parser::sort::SortData::new(
+                currency_type,
+                armbankrate_parser::CurrencyName::GBP,
+                OrderType::Sell,
+            ),
+            CurrencyName::EurBuy => armbankrate_parser::sort::SortData::new(
+                currency_type,
+                armbankrate_parser::CurrencyName::EUR,
+                OrderType::Buy,
+            ),
+            CurrencyName::EurSell => armbankrate_parser::sort::SortData::new(
+                currency_type,
+                armbankrate_parser::CurrencyName::EUR,
+                OrderType::Sell,
+            ),
+            CurrencyName::RubBuy => armbankrate_parser::sort::SortData::new(
+                currency_type,
+                armbankrate_parser::CurrencyName::RUB,
+                OrderType::Buy,
+            ),
+            CurrencyName::RubSell => armbankrate_parser::sort::SortData::new(
+                currency_type,
+                armbankrate_parser::CurrencyName::RUB,
+                OrderType::Sell,
+            ),
         }
     }
 }
