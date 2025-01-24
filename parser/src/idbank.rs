@@ -80,7 +80,7 @@ impl BankImpl for Idbank {
                     ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
                         .ok_or(BankParseFail)?
                         .inner_html();
-                match { self.currency_value_regex.find(&inner_html) } {
+                match self.currency_value_regex.find(&inner_html) {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),
                 }
@@ -91,7 +91,7 @@ impl BankImpl for Idbank {
                     ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
                         .ok_or(BankParseFail)?
                         .inner_html();
-                match { self.currency_value_regex.find(&inner_html) } {
+                match self.currency_value_regex.find(&inner_html) {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),
                 }
@@ -120,7 +120,7 @@ impl BankImpl for Idbank {
                     ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
                         .ok_or(BankParseFail)?
                         .inner_html();
-                match { self.currency_value_regex.find(&inner_html) } {
+                match self.currency_value_regex.find(&inner_html) {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),
                 }
@@ -131,7 +131,7 @@ impl BankImpl for Idbank {
                     ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
                         .ok_or(BankParseFail)?
                         .inner_html();
-                match { self.currency_value_regex.find(&inner_html) } {
+                match self.currency_value_regex.find(&inner_html) {
                     Some(matched) => matched.as_str().parse::<f64>().unwrap_or_default(),
                     None => Default::default(),
                 }
