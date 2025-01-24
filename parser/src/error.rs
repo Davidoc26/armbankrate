@@ -1,4 +1,5 @@
-use core::num::dec2flt::ParseFloatError;
+use std::num::ParseFloatError;
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]
