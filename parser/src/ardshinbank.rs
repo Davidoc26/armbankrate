@@ -1,7 +1,11 @@
-use crate::{BankBody, BankImpl, BankParseFail, Currency, CurrencyBody, CurrencyName, Error};
+use crate::{
+    BankBody, BankImpl, BankParseFail, Currency, CurrencyBody, CurrencyName, Error, CLIENT,
+};
 use async_trait::async_trait;
-use scraper::{ElementRef, Html, Selector};
+use scraper::Html;
 use serde::Serialize;
+use serde_json::Value;
+use std::collections::HashMap;
 use std::str::FromStr;
 
 #[derive(Debug, Serialize)]
@@ -10,12 +14,6 @@ pub struct Ardshinbank {
     body: BankBody,
     cash_currencies: CurrencyBody,
     no_cash_currencies: CurrencyBody,
-    #[serde(skip_serializing)]
-    cash_selector: Selector,
-    #[serde(skip_serializing)]
-    no_cash_selector: Selector,
-    #[serde(skip_serializing)]
-    span_selector: Selector,
 }
 
 impl Default for Ardshinbank {
@@ -23,105 +21,68 @@ impl Default for Ardshinbank {
         Self {
             body: BankBody {
                 name: "Ardshinbank".to_string(),
-                url: "https://www.ardshinbank.am".to_string(),
+                url: "https://website-api.ardshinbank.am/currency".to_string(),
             },
             cash_currencies: Default::default(),
             no_cash_currencies: Default::default(),
-            cash_selector: Selector::parse(r#"#cash > table > tbody > tr > td.tg-cod"#).unwrap(),
-            no_cash_selector: Selector::parse(r#"#no-cash > table > tbody > tr > td.tg-cod"#)
-                .unwrap(),
-            span_selector: Selector::parse("span").unwrap(),
         }
     }
 }
 
 #[async_trait]
 impl BankImpl for Ardshinbank {
-    fn parse_cash(&mut self, document: &Html) -> Result<(), Error> {
-        for element in document.select(&self.cash_selector).take(4) {
-            let currency_name = {
-                element
-                    .select(&self.span_selector)
-                    .next()
-                    .ok_or(BankParseFail)?
-                    .inner_html()
-                    .trim_start_matches('\n')
-                    .to_string()
-            };
+    async fn parse(&mut self) -> Result<(), Error> {
+        let response = CLIENT
+            .get(self.get_url())
+            .send()
+            .await?
+            .json::<HashMap<String, Value>>()
+            .await?;
+        let cash_currencies = response["data"]["currencies"]["cash"]
+            .as_array()
+            .ok_or(BankParseFail)?;
+        let no_cash_currencies = response["data"]["currencies"]["no_cash"]
+            .as_array()
+            .ok_or(BankParseFail)?;
 
-            let currency_buy = {
-                ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
-                    .ok_or(BankParseFail)?
-                    .select(&self.span_selector)
-                    .next()
-                    .ok_or(BankParseFail)?
-                    .inner_html()
-                    .parse::<f64>()?
-            };
-
-            let currency_sell = {
-                ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
-                    .ok_or(BankParseFail)?
-                    .select(&self.span_selector)
-                    .next()
-                    .ok_or(BankParseFail)?
-                    .inner_html()
-                    .parse::<f64>()?
-            };
-
-            let currency = Currency::new(
-                CurrencyName::from_str(&currency_name).unwrap_or_default(),
-                currency_buy.into(),
-                currency_sell.into(),
-            );
-
-            self.cash_currencies.fill_from_currency(currency);
-        }
-        Ok(())
-    }
-
-    fn parse_no_cash(&mut self, document: &Html) -> Result<(), Error> {
-        for element in document.select(&self.no_cash_selector).take(4) {
-            let currency_name = {
-                element
-                    .select(&self.span_selector)
-                    .next()
-                    .ok_or(BankParseFail)?
-                    .inner_html()
-                    .trim_start_matches('\n')
-                    .to_string()
-            };
-
-            let currency_name = match CurrencyName::from_str(&currency_name) {
+        for currency in cash_currencies {
+            let currency_name =
+                CurrencyName::from_str(currency["type"].as_str().ok_or(BankParseFail)?);
+            let currency_name = match currency_name {
                 Ok(name) => name,
                 Err(_) => continue,
             };
 
-            let currency_buy = {
-                ElementRef::wrap(element.next_siblings().nth(1).ok_or(BankParseFail)?)
-                    .ok_or(BankParseFail)?
-                    .select(&self.span_selector)
-                    .next()
-                    .ok_or(BankParseFail)?
-                    .inner_html()
-                    .parse::<f64>()?
+            let buy = serde_json::from_str::<f64>(currency["buy"].as_str().ok_or(BankParseFail)?)?;
+            let sell =
+                serde_json::from_str::<f64>(currency["sell"].as_str().ok_or(BankParseFail)?)?;
+            let currency = Currency::new(currency_name, buy.into(), sell.into());
+            self.cash_currencies.fill_from_currency(currency);
+        }
+
+        for currency in no_cash_currencies {
+            let currency_name =
+                CurrencyName::from_str(currency["type"].as_str().ok_or(BankParseFail)?);
+            let currency_name = match currency_name {
+                Ok(name) => name,
+                Err(_) => continue,
             };
 
-            let currency_sell = {
-                ElementRef::wrap(element.next_siblings().nth(3).ok_or(BankParseFail)?)
-                    .ok_or(BankParseFail)?
-                    .select(&self.span_selector)
-                    .next()
-                    .ok_or(BankParseFail)?
-                    .inner_html()
-                    .parse::<f64>()?
-            };
-
-            let currency = Currency::new(currency_name, Some(currency_buy), Some(currency_sell));
-
+            let buy = serde_json::from_str::<f64>(currency["buy"].as_str().ok_or(BankParseFail)?)?;
+            let sell =
+                serde_json::from_str::<f64>(currency["sell"].as_str().ok_or(BankParseFail)?)?;
+            let currency = Currency::new(currency_name, buy.into(), sell.into());
             self.no_cash_currencies.fill_from_currency(currency);
         }
+
         Ok(())
+    }
+    fn parse_cash(&mut self, _document: &Html) -> Result<(), Error> {
+        unreachable!()
+    }
+
+    fn parse_no_cash(&mut self, _document: &Html) -> Result<(), Error> {
+        unreachable!()
     }
 
     fn cash_currencies(&self) -> &CurrencyBody {
