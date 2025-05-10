@@ -82,7 +82,7 @@ async fn parse_banks(banks: &mut Vec<Bank>) {
 }
 
 fn json_from(banks: &Vec<Bank>) -> Result<String, Error> {
-    let mut bank_map: HashMap<&String, &Bank> = HashMap::with_capacity(banks.len());
+    let mut bank_map: HashMap<&str, &Bank> = HashMap::with_capacity(banks.len());
 
     for bank in banks {
         let bank_name = bank.get_name();
@@ -138,8 +138,8 @@ pub trait BankImpl: Send {
     fn cash_currencies(&self) -> &CurrencyBody;
     fn no_cash_currencies(&self) -> &CurrencyBody;
 
-    fn get_name(&self) -> &String;
-    fn get_url(&self) -> &String;
+    fn get_name(&self) -> &str;
+    fn get_url(&self) -> &str;
 }
 
 #[derive(Default, Debug, Serialize)]
@@ -151,8 +151,8 @@ pub struct Currency {
 
 #[derive(Default, Debug)]
 struct BankBody {
-    name: String,
-    url: String,
+    name: &'static str,
+    url: &'static str,
 }
 
 impl Currency {

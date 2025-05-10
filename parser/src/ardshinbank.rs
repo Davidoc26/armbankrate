@@ -20,8 +20,8 @@ impl Default for Ardshinbank {
     fn default() -> Self {
         Self {
             body: BankBody {
-                name: "Ardshinbank".to_string(),
-                url: "https://website-api.ardshinbank.am/currency".to_string(),
+                name: "Ardshinbank",
+                url: "https://website-api.ardshinbank.am/currency",
             },
             cash_currencies: Default::default(),
             no_cash_currencies: Default::default(),
@@ -93,11 +93,11 @@ impl BankImpl for Ardshinbank {
         &self.no_cash_currencies
     }
 
-    fn get_name(&self) -> &String {
-        &self.body.name
+    fn get_name(&self) -> &str {
+        self.body.name
     }
 
-    fn get_url(&self) -> &String {
-        &self.body.url
+    fn get_url(&self) -> &str {
+        self.body.url
     }
 }

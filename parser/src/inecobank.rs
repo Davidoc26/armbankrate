@@ -20,8 +20,8 @@ impl Default for Inecobank {
     fn default() -> Self {
         Self {
             body: BankBody {
-                name: "Inecobank".to_string(),
-                url: "https://www.inecobank.am/api/rates/".to_string(),
+                name: "Inecobank",
+                url: "https://www.inecobank.am/api/rates/",
             },
             cash_currencies: Default::default(),
             cashless_currencies: Default::default(),
@@ -85,11 +85,11 @@ impl BankImpl for Inecobank {
         &self.cashless_currencies
     }
 
-    fn get_name(&self) -> &String {
-        &self.body.name
+    fn get_name(&self) -> &str {
+        self.body.name
     }
 
-    fn get_url(&self) -> &String {
-        &self.body.url
+    fn get_url(&self) -> &str {
+        self.body.url
     }
 }

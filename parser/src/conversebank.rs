@@ -40,8 +40,8 @@ impl Default for Conversebank {
     fn default() -> Self {
         Self {
             body: BankBody {
-                name: "Conversebank".to_string(),
-                url: "https://www.conversebank.am/ru/exchange-rate/".to_string(),
+                name: "Conversebank",
+                url: "https://www.conversebank.am/ru/exchange-rate/",
             },
             cash_currencies: Default::default(),
             cashless_currencies: Default::default(),
@@ -96,11 +96,11 @@ impl BankImpl for Conversebank {
         &self.cashless_currencies
     }
 
-    fn get_name(&self) -> &String {
-        &self.body.name
+    fn get_name(&self) -> &str {
+        self.body.name
     }
 
-    fn get_url(&self) -> &String {
-        &self.body.url
+    fn get_url(&self) -> &str {
+        self.body.url
     }
 }

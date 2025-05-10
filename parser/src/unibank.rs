@@ -19,8 +19,8 @@ impl Default for Unibank {
     fn default() -> Self {
         Self {
             body: BankBody {
-                name: "Unibank".to_string(),
-                url: "https://www.unibank.am/".to_string(),
+                name: "Unibank",
+                url: "https://www.unibank.am/",
             },
             cash_currencies: Default::default(),
             cashless_currencies: Default::default(),
@@ -139,11 +139,11 @@ impl BankImpl for Unibank {
         &self.cashless_currencies
     }
 
-    fn get_name(&self) -> &String {
-        &self.body.name
+    fn get_name(&self) -> &str {
+        self.body.name
     }
 
-    fn get_url(&self) -> &String {
-        &self.body.url
+    fn get_url(&self) -> &str {
+        self.body.url
     }
 }
